@@ -122,6 +122,7 @@ PARENT_STREAM_MAP = {
 # NB: These streams will only sync through once for creates, never updates.
 IMMUTABLE_STREAMS = {'balance_transactions', 'events'}
 IMMUTABLE_STREAM_LOOKBACK = 600  # 10 min in epoch time, Stripe accuracy is to the second
+FULL_REFRESH_STREAMS = ['tax_codes']
 
 LOGGER = singer.get_logger()
 
@@ -547,7 +548,7 @@ def write_bookmark_for_stream(stream_name, replication_key, stream_bookmark):
     # Invoices's replication key changed from `date` to `created` in latest API version.
     # Invoice line Items write bookmark with Invoice's replication key but it changed to `created`
     # so kept `date` in bookmarking for Invoices and Invoice line Items as it has to respect bookmark of active connection too.
-    if stream_name in ['tax_codes']: 
+    if stream_name in FULL_REFRESH_STREAMS: 
         return 
     if stream_name in ['invoices', 'invoice_line_items']:
         singer.write_bookmark(Context.state,
@@ -707,7 +708,7 @@ def sync_stream(stream_name, is_sub_stream=False):
             singer.write_state(Context.state)
 
             # update window for next iteration
-            if stream_name == 'tax_codes':
+            if stream_name in FULL_REFRESH_STREAMS:
                 start_window = end_time
             else: 
                 start_window = stop_window
