@@ -102,7 +102,7 @@ STREAM_TO_EXPAND_FIELDS = {
     'customers': ['data.sources', 'data.subscriptions', 'data.tax_ids'],
     'plans': ['data.tiers'],
     'invoice_items': ['data.plan.tiers'],
-    'invoice_line_items': ['data.plan.tiers'],
+    'invoice_line_items': ['data.plan.tiers', 'data.tax_amounts.tax_rate'],
     'subscriptions': ['data.plan.tiers'],
     'subscription_items': ['data.plan.tiers']
 }
@@ -758,7 +758,7 @@ def sync_sub_stream(sub_stream_name, parent_obj, updates=False):
     extraction_time = singer.utils.now()
 
     if sub_stream_name == "invoice_line_items":
-        object_list = parent_obj.lines
+        object_list = parent_obj.lines.list(expand=STREAM_TO_EXPAND_FIELDS[sub_stream_name])
     elif sub_stream_name == "subscription_items":
         # parent_obj.items is a function that returns a dict iterator, so use the attribute
         object_list = parent_obj.get("items")
