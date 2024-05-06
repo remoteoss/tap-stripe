@@ -9,12 +9,24 @@ class MockLines:
 
     def to_dict_recursive(self):
         return self.data
+    
+    def list(self, **kwargs):
+        return self.data
+    
+    def __iter__(self):
+        yield from self.data
+    
+
 
 # mock invoice
 class MockInvoice:
     def __init__(self, lines):
-        self.lines = lines
+        self._lines = MockLines(lines)
         self.id = "inv_testinvoice"
+    
+    @property
+    def lines(self) -> MockLines:
+        return self._lines
 
 # mock transform function
 def transform(*args, **kwargs):
